@@ -587,33 +587,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: Base 1 (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 3174363207589383991, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-      propertyPath: m_BaseOffset
-      value: -0.07
-      objectReference: {fileID: 0}
     - target: {fileID: 8552013034593976613, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-      propertyPath: brave
+      propertyPath: scary
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8552013034593976613, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-      propertyPath: lifespan
-      value: 500
-      objectReference: {fileID: 0}
-    - target: {fileID: 8552013034593976613, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-      propertyPath: roamTimerUp
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 8552013034593976613, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-      propertyPath: roamTimerLow
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8552013034593976613, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-      propertyPath: defaultSpeedLower
-      value: 1.125
-      objectReference: {fileID: 0}
-    - target: {fileID: 8552013034593976613, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-      propertyPath: defaultSpeedUpper
-      value: 1.375
+      propertyPath: chaser
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
@@ -2289,12 +2269,12 @@ MonoBehaviour:
   - {fileID: 1687634352}
   NPCList:
   - {fileID: 2166370448187041215, guid: df25b0ba3c3e1f74ab0ca6cdc10f89a0, type: 3}
-  maxNPC: 0
+  maxNPC: 50
   mask:
     serializedVersion: 2
     m_Bits: 2147483647
-  NPCStartingAmountUpper: 0
-  NPCStartingAmountLower: 0
+  NPCStartingAmountUpper: 50
+  NPCStartingAmountLower: 50
 --- !u!1 &1458738628
 GameObject:
   m_ObjectHideFlags: 0

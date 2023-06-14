@@ -28,7 +28,7 @@ public class NPCMove : MonoBehaviour
     public float updateCap = 60;
     [SerializeField]
     [Tooltip("How often this agent searches for other agents in level")]
-    float searchCap = 1f;
+	float searchCap = .1f;
     float scarySearchCount, AttractiveSearchCount, scaredSearchCount, NPCSearchCount, destSearchCount;
 	[SerializeField]
     public NavMeshAgent agent;
@@ -78,12 +78,14 @@ public class NPCMove : MonoBehaviour
     float roamTimer;
     NPCBehaviorChangersList list;
     [SerializeField]
-    public bool chaser, runner, scary, attractive, chasing, brave, scared, gate;
+	public bool chaser, runner, scary, attractive, chasing, brave, scared, gate;
 
     bool lifespanGate;
     NPCFactory fact;
-    float tempSpeed;
-
+	float tempSpeed;
+	float critTimer;
+	float critCap = 5f;
+	float scaredStiffTimer = 1f, scaredStiffCap = 1f;
     void Start()
 	{
 		runSpeed = Random.Range(runSpeedLower, runSpeedUpper);
@@ -161,7 +163,7 @@ public class NPCMove : MonoBehaviour
         if(list.nonScaryNPCs.Count > 0){
             foreach (GameObject g in list.nonScaryNPCs){
                 float dist = Vector3.Distance(g.gameObject.transform.position, currentPos);
-                if (dist < minDist && g != this.gameObject){
+	            if (dist < minDist && g != this.gameObject && !g.GetComponent<NPCMove>().isLeaving){
                     Min = g;
                     minDist = dist;
                 }
@@ -216,7 +218,8 @@ public class NPCMove : MonoBehaviour
         }
         //if(Min != null){
         //    Debug.Log(this.gameObject.name + " " + Min.gameObject.name);
-        //}
+	    //}
+	    //sometimes agents get set to very low speeds, but shouldnt matter in this project 
         if(isLeaving){
             //Debug.Log(this.gameObject.name + " is leaving");
             if(!destGate){
@@ -313,8 +316,23 @@ public class NPCMove : MonoBehaviour
                 }
 
             }
-            if(scared){
-                findEscape();
+	        
+	        
+	        if(scared){
+		        //why are scared agents bouncing between speeds all jittery like?
+		        if(agent.velocity.magnitude < 1f){
+		        	
+		        	scaredStiffTimer += Time.deltaTime;
+		        	if(scaredStiffTimer > scaredStiffCap){
+		        		Debug.Log( this.name + " is Scared and Stuck!", this.gameObject);
+		        		scaredStiffTimer = 0f;
+		        		PanicRoam();
+		        	}
+		        }
+		        
+		        else{
+		        	findEscape();
+		        }
             }
             else if(!scared && !chaser && !attractive){
                 //Debug.Log(this.gameObject.name + "is not scared or a chaser");
@@ -348,6 +366,7 @@ public class NPCMove : MonoBehaviour
                 }
             }
         }
+	    //maybe chasers shouldnt chase other chasers??
         else if(chaser){
             //Debug.Log(this.gameObject.name + "is a chaser");
             //need to create logic for when a chaser reaches its target
@@ -384,21 +403,40 @@ public class NPCMove : MonoBehaviour
                 if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
 	                //Debug.Log("Caught up to chasee", this.gameObject);
 	                //Debug.Log("Caught up to chasee", Min.gameObject);
-                    changeAgentSpeedToGiven(Min.gameObject.GetComponent<NPCMove>().agent.speed * .5f);
+	                
+	                //boost the person being chased speed inspead of cutting the chasers speed in half?
+	                Min.gameObject.GetComponent<NPCMove>().changeAgentSpeedToGiven(agent.speed * 1.5f);
+	                changeAgentSpeedToGiven(Min.gameObject.GetComponent<NPCMove>().agent.speed * .75f);
+	                
                     //tempSpeed = agent.speed;
                     //StopAllCoroutines();
                     //StartCoroutine(Fade((Min.gameObject.GetComponent<NPCMove>().agent.speed * .5f)));
                     //agent.speed = (Min.gameObject.GetComponent<NPCMove>().agent.speed * .5f);
                 }
+	            //VERY close
+	            
+	            //this is causing some issues where two chasers will get stuck standing near eachother indefinitely 
+	            
+	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2f && Min.gameObject.GetComponent<NPCMove>().agent.velocity.magnitude < 1f){
+	            	
+		            // critTimer += Time.deltaTime;
+		            // if(critTimer >= critCap){
+			            //	critTimer = 0f;
+		            	changeAgentSpeedToGiven(0f);
+			            //}
+		            
+	            }
             }
         }
 
     }
+
     void resetRaycastBlock(){
         raycastBlock = false;
         
     }
-    void findEscape(){
+	void findEscape(){
+		scaredStiffTimer = 0f;
         //Debug.Log(this.gameObject.name + "is finding escape");
         if(!runner){
             GetClosestScary();
@@ -563,21 +601,36 @@ public class NPCMove : MonoBehaviour
         scared = false;
     }
 
-    void changeAgentSpeedToGiven(float speed){
-        tempSpeed = agent.speed;
-        StopCoroutine("Fade");
-        StartCoroutine(Fade(speed));
-    }
+	void changeAgentSpeedToGiven(float speed){
+		//This seems to be running faster when running from sprint to default rather, then a good speed when going from default to sprint. idk??
+		
+		if(Mathf.Approximately(Mathf. Round(speed * 10.0f) * 0.1f, Mathf. Round(agent.speed * 10.0f) * 0.1f))
+		{
+		//if(speed == agent.speed){
+			return;
+		}
+		else{
+			tempSpeed = agent.speed;
+			//StopCoroutine("Fade");
+			StartCoroutine(StartC(speed));	
+		}
+
+	}
+	float fadeTimer = 1f;
+	IEnumerator StartC(float newSpeed){
+		yield return StartCoroutine(Fade(newSpeed));
+	}
     IEnumerator Fade(float newSpeed)
     {
         float elapsedTime = 0f;
         float startSpeed = agent.speed;
         float speedDifference = newSpeed - startSpeed;
 
-        while (elapsedTime < 2f)
+        while (elapsedTime < fadeTimer)
         {
+        	//Debug.Log("CHANGING SPEED");
             elapsedTime += Time.deltaTime;
-            agent.speed = startSpeed + (speedDifference * (elapsedTime / 2f));
+            agent.speed = startSpeed + (speedDifference * (elapsedTime / fadeTimer));
             yield return null;
         }
         

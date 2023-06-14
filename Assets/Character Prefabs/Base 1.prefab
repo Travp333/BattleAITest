@@ -694,7 +694,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 0
+  m_BaseOffset: -0.07
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
 --- !u!114 &5438364775009936644
@@ -726,7 +726,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   debugText: {fileID: 2387080837656796900}
   destThreshold: 5
-  lifespan: 0
+  lifespan: 500
   isLeaving: 0
   carrot: {fileID: 2798646888112091428}
   mask:
@@ -737,8 +737,8 @@ MonoBehaviour:
   slowSpeed: 0
   runSpeedUpper: 5.5
   runSpeedLower: 4.5
-  defaultSpeedUpper: 1.5
-  defaultSpeedLower: 1
+  defaultSpeedUpper: 1.375
+  defaultSpeedLower: 1.125
   slowSpeedUpper: 1
   slowSpeedLower: 0.25
   updateCap: 30
@@ -748,13 +748,13 @@ MonoBehaviour:
   fearRadius: 25
   detectRadius: 120
   criticalDist: 5
-  roamTimerUp: 120
-  roamTimerLow: 50
+  roamTimerUp: 20
+  roamTimerLow: 5
   raycastCapUpper: 0.8
   raycastCapLower: 0.3
-  runningAngle: 60
+  runningAngle: 20
   moveBlocked: 0
-  reflectRange: 30
+  reflectRange: 10
   chaser: 0
   runner: 0
   scary: 0
