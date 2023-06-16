@@ -11,15 +11,6 @@ public class charAnimScript : MonoBehaviour
     float speedometer;
     [SerializeField]
     float sprintCutoff;
-    [SerializeField]
-	float idleCutoff = .01f;
-	float speedUpdateTime;
-	float speedUpdateCap = 1f;
-	float currentSpeed;
-	float t;
-	bool isBlending;
-	float speedBlendTime = 1f;
-	float speedLerp;
 	Vector3 tempScale;
     // Start is called before the first frame update
     void Start()
@@ -46,8 +37,23 @@ public class charAnimScript : MonoBehaviour
 	        anim.SetFloat("speed", 1);
         }
         else{
-        	anim.SetFloat("speed", speedometer / move.runSpeed);
+        	blendTwoFloats(speedometer / move.runSpeed, 2f);
         }
 
     }
+	void blendTwoFloats(float goal, float rate){
+		if(Mathf.Approximately(Mathf.Round(anim.GetFloat("speed") * 10.0f) * 0.1f, Mathf.Round(goal * 10.0f) * 0.1f)){
+			//Debug.Log("Close enough, matching speeds");
+			//anim.SetFloat("speed", goal);
+			return;
+		}
+		else if(anim.GetFloat("speed") > goal){
+			anim.SetFloat("speed", anim.GetFloat("speed") - Time.deltaTime / rate);
+		}
+		else if (anim.GetFloat("speed") < goal){
+			anim.SetFloat("speed", anim.GetFloat("speed") + Time.deltaTime / rate);
+		}
+
+	}
+	//compare two things, if greater, slowlyincrease with time.delta time. if less, slowly decreae
 }

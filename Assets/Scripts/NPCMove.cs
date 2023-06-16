@@ -83,8 +83,6 @@ public class NPCMove : MonoBehaviour
     bool lifespanGate;
     NPCFactory fact;
 	float tempSpeed;
-	float critTimer;
-	float critCap = 5f;
 	float scaredStiffTimer = 1f, scaredStiffCap = 1f;
     void Start()
 	{
@@ -155,6 +153,7 @@ public class NPCMove : MonoBehaviour
             }
         }
     }
+	//also excludes chasers
     void GetClosestNONSCARYNPC(){
         //Debug.Log(this.gameObject.name + "is finding the nearest non scary npc");
         Min = null;
@@ -163,7 +162,7 @@ public class NPCMove : MonoBehaviour
         if(list.nonScaryNPCs.Count > 0){
             foreach (GameObject g in list.nonScaryNPCs){
                 float dist = Vector3.Distance(g.gameObject.transform.position, currentPos);
-	            if (dist < minDist && g != this.gameObject && !g.GetComponent<NPCMove>().isLeaving){
+	            if (dist < minDist && g != this.gameObject && !g.GetComponent<NPCMove>().isLeaving && !g.GetComponent<NPCMove>().chaser){
                     Min = g;
                     minDist = dist;
                 }
@@ -201,53 +200,7 @@ public class NPCMove : MonoBehaviour
             debugCount = 0.5f;
             changeDebugText();
         }
-        if(lifespan > 0f){  
-            lifespan -= Time.deltaTime;
-            isLeaving = false;
-            lifespanGate = false;
-        }
-        else if (lifespan <= 0f){
-            lifespan = 0f;
-            if(!lifespanGate){
-                resetScared();
-                setIsLeaving(fact.GetRandomPoint());
-                lifespanGate = true;
-
-            }
-            
-        }
-        //if(Min != null){
-        //    Debug.Log(this.gameObject.name + " " + Min.gameObject.name);
-	    //}
-	    //sometimes agents get set to very low speeds, but shouldnt matter in this project 
-        if(isLeaving){
-            //Debug.Log(this.gameObject.name + " is leaving");
-            if(!destGate){
-                NavMesh.CalculatePath(this.transform.position, dest, NavMesh.AllAreas, path);
-                agent.ResetPath();
-                agent.SetPath(path);
-                destGate = true;
-                changeAgentSpeedToGiven(defaultSpeed);
-                //tempSpeed = agent.speed;
-                //StopAllCoroutines();
-                //StartCoroutine(Fade(defaultSpeed));
-                //agent.speed = defaultSpeed;
-            }
-            if(destGate){
-                destSearchCount += Time.deltaTime;
-                if(destSearchCount >= searchCap){
-                    //Debug.Log(this.gameObject.name + " is checking distance" + Vector3.Distance(this.gameObject.transform.position, dest));
-                    if(Vector3.Distance(this.gameObject.transform.position, dest) < destThreshold){
-                        //Debug.Log(this.gameObject.name + " is leaving");
-                        fact.DespawnNPC(this.gameObject);
-                        
-                    }
-                    destSearchCount = destSearchCount - searchCap;
-                }
-            }
-
-        }
-        else if(!chaser && !scary){
+        if(!chaser && !scary){
             //Debug.Log(this.gameObject.name + "is not a chaser and is not scary");
             if(list.scary.Count > 0 && !runner){
                 //Debug.Log(this.gameObject.name + "knows there is a scary agent somewhere");
@@ -260,10 +213,7 @@ public class NPCMove : MonoBehaviour
                     scarySearchCount = scarySearchCount - searchCap;
                     //calculate a path away from that scary NPC
                 }
-                // if you are a runner, just find the nearest NPC and run away from them
-                
                 if(Min != null){
-                    
                     NavMesh.CalculatePath(Min.transform.position, this.transform.position , NavMesh.AllAreas, path);
                     float dist = Vector3.Distance(this.transform.position, Min.transform.position);
 
@@ -284,7 +234,7 @@ public class NPCMove : MonoBehaviour
                     }
                 }
             }
-
+	        //if you are a runner, just find the nearest NPC and run away from them
             if(runner){
                 //Debug.Log("I AM RUNNER", this.gameObject);
                 NPCSearchCount += Time.deltaTime;
@@ -316,12 +266,10 @@ public class NPCMove : MonoBehaviour
                 }
 
             }
-	        
-	        
 	        if(scared){
-		        //why are scared agents bouncing between speeds all jittery like?
+	        	//checking if some pathfinding stuff got messed up, basically if a scared agent is stuck 
+	        	//against a wall or something send them to panicRoam so they escape
 		        if(agent.velocity.magnitude < 1f){
-		        	
 		        	scaredStiffTimer += Time.deltaTime;
 		        	if(scaredStiffTimer > scaredStiffCap){
 		        		Debug.Log( this.name + " is Scared and Stuck!", this.gameObject);
@@ -329,7 +277,6 @@ public class NPCMove : MonoBehaviour
 		        		PanicRoam();
 		        	}
 		        }
-		        
 		        else{
 		        	findEscape();
 		        }
@@ -366,10 +313,8 @@ public class NPCMove : MonoBehaviour
                 }
             }
         }
-	    //maybe chasers shouldnt chase other chasers??
         else if(chaser){
             //Debug.Log(this.gameObject.name + "is a chaser");
-            //need to create logic for when a chaser reaches its target
             NPCSearchCount += Time.deltaTime;
             if(NPCSearchCount >= searchCap){
                 GetClosestNONSCARYNPC();
@@ -402,51 +347,43 @@ public class NPCMove : MonoBehaviour
             if(Min != null){
                 if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
 	                //Debug.Log("Caught up to chasee", this.gameObject);
-	                //Debug.Log("Caught up to chasee", Min.gameObject);
 	                
-	                //boost the person being chased speed inspead of cutting the chasers speed in half?
-	                Min.gameObject.GetComponent<NPCMove>().changeAgentSpeedToGiven(agent.speed * 1.5f);
-	                changeAgentSpeedToGiven(Min.gameObject.GetComponent<NPCMove>().agent.speed * .75f);
+	                //enable this if you want the chaser to have a hard time catching the runner,
+	                //basically slows down the chaser and speeds up the chase if they get close enough
 	                
-                    //tempSpeed = agent.speed;
-                    //StopAllCoroutines();
-                    //StartCoroutine(Fade((Min.gameObject.GetComponent<NPCMove>().agent.speed * .5f)));
-                    //agent.speed = (Min.gameObject.GetComponent<NPCMove>().agent.speed * .5f);
+	                //Min.gameObject.GetComponent<NPCMove>().changeAgentSpeedToGiven(agent.speed * 1.5f);
+	                //changeAgentSpeedToGiven(Min.gameObject.GetComponent<NPCMove>().agent.speed * .75f);
+
                 }
-	            //VERY close
-	            
-	            //this is causing some issues where two chasers will get stuck standing near eachother indefinitely 
-	            
+	            //VERY close, stop moving. This is meant to stop agents constantly running in place on top of eachother
 	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2f && Min.gameObject.GetComponent<NPCMove>().agent.velocity.magnitude < 1f){
-	            	
-		            // critTimer += Time.deltaTime;
-		            // if(critTimer >= critCap){
-			            //	critTimer = 0f;
-		            	changeAgentSpeedToGiven(0f);
-			            //}
-		            
+		            changeAgentSpeedToGiven(0f);
 	            }
             }
         }
-
     }
-
     void resetRaycastBlock(){
         raycastBlock = false;
-        
     }
 	void findEscape(){
 		scaredStiffTimer = 0f;
-        //Debug.Log(this.gameObject.name + "is finding escape");
+		
+		//THIS MAY BE ABLE TO BE OPTIMIZED WITH TIMERS, SIMILAR TO HOW IT IS USED ABOVE
+		
+		//Debug.Log(this.gameObject.name + "is finding escape");
+		//if you are not a runner, you are running from the closest scary NPC
         if(!runner){
             GetClosestScary();
         }
+		//if you are a runner, the target you are running from is just the one closest to you
         else if (runner){
             GetClosestNPC();
         }
+		//If there is no scary NPC near you or a targetable one if youre a chaser, just run 
         if(Min == null){
             PanicRoam();
         }
+		//otherwise, you have a valid target to run away from stored in Min
         else{
             float dist = Vector3.Distance(this.transform.position, Min.transform.position);
             Vector3 dirToThreat = this.transform.position - Min.transform.position;
@@ -463,6 +400,11 @@ public class NPCMove : MonoBehaviour
                     this.transform.rotation = Quaternion.RotateTowards (transform.rotation, toRotation, (turnRate) * Time.deltaTime);
                 }
             }
+	        //basically this shoots a raycast in front of scared NPC's to check for walls incoming. If it hits a wall, it reflects a ray off 
+	        //that wall and does another cast. If that hits nothing, that is a navigatable point. If it hits another wall, it reflects again. 
+	        //this repeats up to 3? reflections at which point it just defaults to running in a random direction to get away from whatever 
+	        //is going on
+	        
             //check if a wall is in front of you
             else if(Physics.Raycast(transform.position, this.transform.forward, out hit, reflectRange, mask) && ! raycastBlock){
                 //There is a wall! clear current path, stop movement
@@ -543,14 +485,11 @@ public class NPCMove : MonoBehaviour
             }
         }
        
-    }
+	}
+	// walk to a random point of the map, chill for a bit, navigate to a new one
     void Roam(){
         //Debug.Log(this.gameObject.name + "is roaming");
         changeAgentSpeedToGiven(defaultSpeed);
-        //tempSpeed = agent.speed;
-        //StopAllCoroutines();
-        //StartCoroutine(Fade(defaultSpeed));
-        //agent.speed = defaultSpeed;
         if(counter2 < roamTimer){
             counter2 += Time.deltaTime;
         }
@@ -563,13 +502,10 @@ public class NPCMove : MonoBehaviour
             agent.SetPath(path);
         }
     }
+	//same deal, just running with no breaks. basically a last resort. 
     void PanicRoam(){
         changeAgentSpeedToGiven(runSpeed);
         //Debug.Log(this.gameObject.name + "is panic roaming");
-        //tempSpeed = agent.speed;
-        //StopAllCoroutines();
-        //StartCoroutine(Fade(runSpeed));
-        //agent.speed = runSpeed;
         if(counter2 < Random.Range(roamTimerLow, roamTimerUp)){
             counter2 += Time.deltaTime;
         }
@@ -585,25 +521,17 @@ public class NPCMove : MonoBehaviour
     public void setScared(){
         if(!brave){
             changeAgentSpeedToGiven(runSpeed);
-            //tempSpeed = agent.speed;
-            //StopAllCoroutines();
-            //StartCoroutine(Fade(runSpeed));
-            //agent.speed = runSpeed;
             scared = true;
         }
     }
     public void resetScared(){
         changeAgentSpeedToGiven(defaultSpeed);
-        //tempSpeed = agent.speed;
-        //StopAllCoroutines();
-        //StartCoroutine(Fade(defaultSpeed));
-        //agent.speed = defaultSpeed;
         scared = false;
     }
 
 	void changeAgentSpeedToGiven(float speed){
-		//This seems to be running faster when running from sprint to default rather, then a good speed when going from default to sprint. idk??
-		
+		//This seems to be running faster when running from sprint to default  
+		//then a good speed when going from default to sprint. idk??
 		if(Mathf.Approximately(Mathf. Round(speed * 10.0f) * 0.1f, Mathf. Round(agent.speed * 10.0f) * 0.1f))
 		{
 		//if(speed == agent.speed){

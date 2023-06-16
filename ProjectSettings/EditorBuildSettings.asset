@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/battletestAI.unity
+    guid: 94ad7be21ea33f740a29f10a130564b0
   m_configObjects: {}
