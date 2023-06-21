@@ -41,8 +41,10 @@ public class charAnimScript : MonoBehaviour
         }
 
     }
+    
+	//basically just blends the starting value to a given value at a given rate
 	void blendTwoFloats(float goal, float rate){
-		if(Mathf.Approximately(Mathf.Round(anim.GetFloat("speed") * 10.0f) * 0.1f, Mathf.Round(goal * 10.0f) * 0.1f)){
+		if(Mathf.Approximately(Mathf.Round(anim.GetFloat("speed") * 100.0f) * 0.01f, Mathf.Round(goal * 100.0f) * 0.01f)){
 			//Debug.Log("Close enough, matching speeds");
 			//anim.SetFloat("speed", goal);
 			return;
@@ -55,5 +57,4 @@ public class charAnimScript : MonoBehaviour
 		}
 
 	}
-	//compare two things, if greater, slowlyincrease with time.delta time. if less, slowly decreae
 }

@@ -499,7 +499,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 71cfcb49340aa30418dc867faa18989c, type: 2}
+  - {fileID: 2100000, guid: 19ff2e7c259821147bdeb7c3b30664fa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -601,7 +601,7 @@ GameObject:
   - component: {fileID: 8552013034593976613}
   - component: {fileID: 6165444659557309713}
   m_Layer: 0
-  m_Name: Base 1
+  m_Name: Black
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -724,10 +724,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0b62aff799b4cf488163a1b06a52bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  team: 6
   debugText: {fileID: 2387080837656796900}
   destThreshold: 5
-  lifespan: 500
-  isLeaving: 0
   carrot: {fileID: 2798646888112091428}
   mask:
     serializedVersion: 2
@@ -741,11 +740,12 @@ MonoBehaviour:
   defaultSpeedLower: 1.125
   slowSpeedUpper: 1
   slowSpeedLower: 0.25
-  updateCap: 30
+  updateCap: 10
   searchCap: 1
   agent: {fileID: 3174363207589383991}
   turnRate: 500
-  fearRadius: 25
+  Min: {fileID: 0}
+  fearRadius: 10
   detectRadius: 120
   criticalDist: 5
   roamTimerUp: 20
@@ -755,7 +755,7 @@ MonoBehaviour:
   runningAngle: 20
   moveBlocked: 0
   reflectRange: 10
-  chaser: 0
+  chaser: 1
   runner: 0
   scary: 0
   attractive: 0
@@ -763,6 +763,8 @@ MonoBehaviour:
   brave: 0
   scared: 0
   gate: 0
+  scaredStiffCap: 2.5
+  CritDistRotateCap: 5
 --- !u!114 &6165444659557309713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -776,34 +778,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Body: "In order to change this to fit my \"battle NPC\" plans, i need to \nchange
-    some stuff. First of all I dont think the \"Attractive\" trait\nhas any place
-    here. I think \"Scared\" can still work as is, I will\njust need to set it up
-    so they get scared when at low hp. \n\"Brave\" can stay, just repurposed. Im
-    imagining a threshold\nthat will be a cutoff point when an npc will run for their
-    lives, \nfor example when an npc's hp drops below 25%, they will run.\nA \"Brave\"
-    NPC will simply never run away. \"Runner\" is likely\ngone too, I cant imagine
-    a fighter than runs from everything \nimmedatly being very fun to work with.
-    \"Chaser\" is \nuneccesary, as every agent should be chasing members \nof the
-    enemy team. Basically everyone is a chase already. \nMaybe \"Scary\" could work,
-    ie it raises the threshold at which\nNPC's run away, or maybe just makes then
-    run away \nimmediatly. \n\nNPC Factory needs to be overhauled. It could remain
-    for now\nfor testing purposes, spawning NPC's to fight endlessly\nassigned to
-    random teams, but i think ideally the units are \nchosen beforehand manually.
-    IDK tho\n\nThe Lifespan and despawning system is totally unneccesary \nas well,
-    as the agents should simply die. \n\nThe list being kep tracking all the NPC's
-    also \nneeds to be overhauled to track teams as well. ie there's a \nscary npc
-    near me, is he on my team? no? then im scared.\n\nI think \"Roam\" will need
-    some changes too, as They are in \ncombat they probably shouldnt just be casually
-    strolling \naround. If the situation arises that they are unaware of any \nnearby
-    enemies, they should enter a \"Searching\" state instead\nMaybe Roam can stay
-    the same after all enemeis have been \ndefeated, but in that case the round is
-    over so its kinda \nunneccesary. I guess if they clear them all out but then\nanother
-    one spawns they could enter then leave that\nstate? idk\n\nIdeally i will have
-    prefabs of different types of fighters with \ndifferent stats and eventually
-    models and styles that I can \nsimply tag as a member of a given team. At that
-    point they \nwill act according to their stats and their team allegiance. \n\nObviously
-    the actual combat part of this will likely prove very \ntedious and difficult,
-    and that will be a bulk of the time."
+    some stuff. Attractive should just only attract team\nmembers. I think \"Scared\"
+    can still work as is, I will\njust need to set it up so they get scared when
+    at low hp. \n\"Brave\" can stay, just repurposed. Im imagining a threshold\nthat
+    will be a cutoff point when an npc will run for their lives, \nfor example when
+    an npc's hp drops below 25%, they will run.\nA \"Brave\" NPC will simply never
+    run away. \"Runner\" is toggled\non once an NPC's health drops below a threshold.\"Chaser\"
+    is \nuneccesary, as every agent should be chasing members \nof the enemy team.
+    Basically everyone is a chase already. \nMaybe \"Scary\" could work, ie it raises
+    the threshold at which\nNPC's run away, or maybe just makes then run away \nimmediatly.
+    \n\nNPC Factory needs to be overhauled. It could remain for now\nfor testing
+    purposes, spawning NPC's to fight endlessly\nassigned to random teams, but i
+    think ideally the units are \nchosen beforehand manually. IDK tho\n\nThe Lifespan
+    and despawning system is totally unneccesary \nas well, as the agents should
+    simply die. \n\nThe list being kep tracking all the NPC's also \nneeds to be
+    overhauled to track teams as well. ie there's a \nscary npc near me, is he on
+    my team? no? then im scared.\n\nI think \"Roam\" will need some changes too,
+    as They are in \ncombat they probably shouldnt just be casually strolling \naround.
+    If the situation arises that they are unaware of any \nnearby enemies, they should
+    enter a \"Searching\" state instead\nMaybe Roam can stay the same after all enemeis
+    have been \ndefeated, but in that case the round is over so its kinda \nunneccesary.
+    I guess if they clear them all out but then\nanother one spawns they could enter
+    then leave that\nstate? idk\n\nIdeally i will have prefabs of different types
+    of fighters with \ndifferent stats and eventually models and styles that I can
+    \nsimply tag as a member of a given team. At that point they \nwill act according
+    to their stats and their team allegiance. \n\nObviously the actual combat part
+    of this will likely prove very \ntedious and difficult, and that will be a bulk
+    of the time."
 --- !u!1 &2493467487748211944
 GameObject:
   m_ObjectHideFlags: 0

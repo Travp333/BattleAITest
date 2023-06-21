@@ -6,11 +6,12 @@ using TMPro;
 
 public class NPCMove : MonoBehaviour
 {
+	enum Team {Black, Blue, Green, Pink, Purple, Red, Silver, Teal, Yellow};
+	[SerializeField]
+	Team team;
     public TMP_Text debugText;
     public float destThreshold = 5f;
     bool destGate;
-    public float lifespan;
-    public bool isLeaving = false;
     Vector3 dest;
     [SerializeField]
     GameObject carrot;
@@ -18,7 +19,6 @@ public class NPCMove : MonoBehaviour
     LayerMask mask;
     [HideInInspector]
     public float runSpeed, defaultSpeed, slowSpeed;
-
     [SerializeField]
     [Tooltip("Speeds of default roaming, boosted scared speed, and a currently unused slow speed(injured?)")]
     public float runSpeedUpper, runSpeedLower, defaultSpeedUpper, defaultSpeedLower, slowSpeedUpper, slowSpeedLower;
@@ -35,14 +35,13 @@ public class NPCMove : MonoBehaviour
     [SerializeField]
     [Tooltip("the rate at which the npc turns")]
     private float turnRate;
-    GameObject Min;
+	public GameObject Min;
     [SerializeField]
     [Tooltip("Radius where npcs get scared")]
     private float fearRadius;
     [SerializeField]
     [Tooltip("Radius where chaser npcs will find targets")]
     private float detectRadius = 60f;
-
     [SerializeField]
     [Tooltip("distance at which the npc will use panicked movement, should be less than fearRadius")]
     float criticalDist;
@@ -55,13 +54,11 @@ public class NPCMove : MonoBehaviour
     [SerializeField]
     [Tooltip("Lower cap of how long an npc waits until roaming to new position")]
     float roamTimerLow = 5;
-
     RaycastHit hit, hit2, hit3;
     Quaternion spreadAngle;
     Vector3 newVector;
-    float raycastCount;
     [SerializeField]
-    [Tooltip("How often an npc will recalculate its running away path(Upper Bound)")]
+    [Tooltip("How often an npc will recalculate its running away path (Upper Bound)")]
     float raycastCapUpper;
     [SerializeField]
     [Tooltip("How often an npc will recalculate its running away path (Lower Bound)")]
@@ -79,11 +76,15 @@ public class NPCMove : MonoBehaviour
     NPCBehaviorChangersList list;
     [SerializeField]
 	public bool chaser, runner, scary, attractive, chasing, brave, scared, gate;
-
-    bool lifespanGate;
     NPCFactory fact;
 	float tempSpeed;
-	float scaredStiffTimer = 1f, scaredStiffCap = 1f;
+	float scaredStiffTimer = 1f;
+	[SerializeField]
+	float scaredStiffCap = 1f;
+	public float critDistRotateTimer = 0f;
+	[SerializeField]
+	[Tooltip("How often the Ai chooses a new target to run from?")]
+	float CritDistRotateCap = 2.5f;
     void Start()
 	{
 		runSpeed = Random.Range(runSpeedLower, runSpeedUpper);
@@ -106,7 +107,6 @@ public class NPCMove : MonoBehaviour
         scarySearchCount = searchCap;
         counter2 = roamTimer;
         raycastCap = Random.Range(raycastCapLower, raycastCapUpper);
-        raycastCount = raycastCap;
         //plugging references
         //meshy = RandomNavmeshLocation(Random.Range(50f, 300f));
         path = new NavMeshPath(); 
@@ -153,6 +153,21 @@ public class NPCMove : MonoBehaviour
             }
         }
     }
+	void GetClosestEnemyNPC(){
+		//Debug.Log(this.gameObject.name + "is finding the nearest npc");
+		Min = null;
+		float minDist = Mathf.Infinity;
+		Vector3 currentPos = transform.position;
+		if(list.npcs.Count > 0){
+			foreach (GameObject g in list.npcs){
+				float dist = Vector3.Distance(g.gameObject.transform.position, currentPos);
+				if (dist < minDist && g != this.gameObject && (g.GetComponent<NPCMove>().team != team)){
+					Min = g;
+					minDist = dist;
+				}
+			}
+		}
+	}
 	//also excludes chasers
     void GetClosestNONSCARYNPC(){
         //Debug.Log(this.gameObject.name + "is finding the nearest non scary npc");
@@ -162,13 +177,29 @@ public class NPCMove : MonoBehaviour
         if(list.nonScaryNPCs.Count > 0){
             foreach (GameObject g in list.nonScaryNPCs){
                 float dist = Vector3.Distance(g.gameObject.transform.position, currentPos);
-	            if (dist < minDist && g != this.gameObject && !g.GetComponent<NPCMove>().isLeaving && !g.GetComponent<NPCMove>().chaser){
+	            if (dist < minDist && g != this.gameObject && !g.GetComponent<NPCMove>().chaser){
                     Min = g;
                     minDist = dist;
                 }
             }
         }
     }
+	void GetClosestNonScaryEnemyNPC(){
+		//Debug.Log(this.gameObject.name + "is finding the nearest non scary npc");
+		Min = null;
+		float minDist = Mathf.Infinity;
+		Vector3 currentPos = transform.position;
+		if(list.nonScaryNPCs.Count > 0){
+			//If if change how scary NPC's work it may be a bad idea to draw from the "NON SCARY" list
+			foreach (GameObject g in list.nonScaryNPCs){
+				float dist = Vector3.Distance(g.gameObject.transform.position, currentPos);
+				if (dist < minDist && g != this.gameObject && (g.GetComponent<NPCMove>().team != team)){
+					Min = g;
+					minDist = dist;
+				}
+			}
+		}
+	}
     void GetClosestAttractive(){
         //Debug.Log(this.gameObject.name + "is finding the nearest attractive npc");
         Min = null;
@@ -183,12 +214,6 @@ public class NPCMove : MonoBehaviour
                 }
             }
         }
-    }
-
-    public void setIsLeaving(Vector3 dest2){
-        
-        isLeaving = true;
-        dest = dest2;
     }
 
     float debugCount = 0f;
@@ -238,9 +263,9 @@ public class NPCMove : MonoBehaviour
             if(runner){
                 //Debug.Log("I AM RUNNER", this.gameObject);
                 NPCSearchCount += Time.deltaTime;
-                if(NPCSearchCount >= searchCap){
+	            if(NPCSearchCount >= searchCap && !scared){
                     //find the closest one, once per second
-                    GetClosestNPC();
+	                GetClosestEnemyNPC();
                     //Debug.Log(this.gameObject.name + "is calculating a path away from " + Min.gameObject.name);
                     NPCSearchCount = NPCSearchCount - searchCap;
                     //calculate a path away from that scary NPC
@@ -317,7 +342,7 @@ public class NPCMove : MonoBehaviour
             //Debug.Log(this.gameObject.name + "is a chaser");
             NPCSearchCount += Time.deltaTime;
             if(NPCSearchCount >= searchCap){
-                GetClosestNONSCARYNPC();
+	            GetClosestEnemyNPC();
                 NPCSearchCount = NPCSearchCount - searchCap;
             }
             if(Min != null){
@@ -372,12 +397,18 @@ public class NPCMove : MonoBehaviour
 		
 		//Debug.Log(this.gameObject.name + "is finding escape");
 		//if you are not a runner, you are running from the closest scary NPC
-        if(!runner){
-            GetClosestScary();
-        }
+		//if(!runner){
+	        //    GetClosestScary();
+	        // }
 		//if you are a runner, the target you are running from is just the one closest to you
-        else if (runner){
-            GetClosestNPC();
+        if (runner){
+        	if(critDistRotateTimer >= CritDistRotateCap){
+	        	GetClosestEnemyNPC();
+	        	critDistRotateTimer = 0f;
+	        }
+	        else{
+	        	critDistRotateTimer += Time.deltaTime;
+	        }
         }
 		//If there is no scary NPC near you or a targetable one if youre a chaser, just run 
         if(Min == null){
@@ -390,7 +421,6 @@ public class NPCMove : MonoBehaviour
 
             dirToThreat.Normalize();
             Vector3 newPos = (transform.position + dirToThreat);
-            raycastCount = raycastCount + Time.deltaTime;
             if(dist < criticalDist){
                 //Debug.Log(this.gameObject.name + " is in Critical Distance");
                 if(NavMesh.CalculatePath(transform.position, carrot.transform.position, NavMesh.AllAreas, path)){
@@ -532,7 +562,7 @@ public class NPCMove : MonoBehaviour
 	void changeAgentSpeedToGiven(float speed){
 		//This seems to be running faster when running from sprint to default  
 		//then a good speed when going from default to sprint. idk??
-		if(Mathf.Approximately(Mathf. Round(speed * 10.0f) * 0.1f, Mathf. Round(agent.speed * 10.0f) * 0.1f))
+		if(Mathf.Approximately(Mathf. Round(speed * 100.0f) * 0.01f, Mathf. Round(agent.speed * 100.0f) * 0.01f))
 		{
 		//if(speed == agent.speed){
 			return;
@@ -563,12 +593,8 @@ public class NPCMove : MonoBehaviour
         }
         
     }
-    void changeDebugText(){
-
-        if( lifespan <= 0){
-            debugText.text = "Despawning";
-        }
-        else if(chaser){
+	void changeDebugText(){
+        if(chaser){
             if(scary){
                 debugText.text = "Scary Chaser";
             }
