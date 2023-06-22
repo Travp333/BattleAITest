@@ -85,8 +85,12 @@ public class NPCMove : MonoBehaviour
 	[SerializeField]
 	[Tooltip("How often the Ai chooses a new target to run from?")]
 	float CritDistRotateCap = 2.5f;
+	[SerializeField]
+	bool fighting;
+	Animator anim;
     void Start()
 	{
+		anim = this.gameObject.GetComponent<Animator>();
 		runSpeed = Random.Range(runSpeedLower, runSpeedUpper);
 		defaultSpeed = Random.Range(defaultSpeedLower, defaultSpeedUpper);
 		slowSpeed = Random.Range(slowSpeedLower, slowSpeedUpper);
@@ -370,7 +374,9 @@ public class NPCMove : MonoBehaviour
                 chasing = false;
             }
             if(Min != null){
-                if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
+	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
+		            fighting = true;
+		            anim.SetBool("IsFighting", true);
 	                //Debug.Log("Caught up to chasee", this.gameObject);
 	                
 	                //enable this if you want the chaser to have a hard time catching the runner,
