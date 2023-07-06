@@ -34,7 +34,7 @@ public class NPCMove : MonoBehaviour
     public NavMeshAgent agent;
     [SerializeField]
     [Tooltip("the rate at which the npc turns")]
-    private float turnRate;
+	public float turnRate;
 	public GameObject Min;
     [SerializeField]
     [Tooltip("Radius where npcs get scared")]
@@ -88,13 +88,17 @@ public class NPCMove : MonoBehaviour
 	[SerializeField]
 	bool fighting;
 	Animator anim;
+	bool isAttackingGate;
+	int rand;
+	NPCFight fight;
     void Start()
 	{
+		fight = this.GetComponent<NPCFight>();
 		anim = this.gameObject.GetComponent<Animator>();
 		runSpeed = Random.Range(runSpeedLower, runSpeedUpper);
 		defaultSpeed = Random.Range(defaultSpeedLower, defaultSpeedUpper);
 		slowSpeed = Random.Range(slowSpeedLower, slowSpeedUpper);
-        debugText.text = "";
+		//debugText.text = "";
         foreach (GameObject g in GameObject.FindGameObjectsWithTag("EmptyScriptHolders") ){
             if(g.GetComponent<NPCFactory>()!=null){
                 fact = g.GetComponent<NPCFactory>();
@@ -220,15 +224,15 @@ public class NPCMove : MonoBehaviour
         }
     }
 
-    float debugCount = 0f;
-    float debugCap = 0.5f;
+	// float debugCount = 0f;
+	// float debugCap = 0.5f;
     void Update()
     {
-        debugCount += Time.deltaTime;
-        if(debugCount >= debugCap){
-            debugCount = 0.5f;
-            changeDebugText();
-        }
+	    // debugCount += Time.deltaTime;
+	    // if(debugCount >= debugCap){
+	        //     debugCount = 0.5f;
+	        //changeDebugText();
+	        // }
         if(!chaser && !scary){
             //Debug.Log(this.gameObject.name + "is not a chaser and is not scary");
             if(list.scary.Count > 0 && !runner){
@@ -301,7 +305,7 @@ public class NPCMove : MonoBehaviour
 		        if(agent.velocity.magnitude < 1f){
 		        	scaredStiffTimer += Time.deltaTime;
 		        	if(scaredStiffTimer > scaredStiffCap){
-		        		Debug.Log( this.name + " is Scared and Stuck!", this.gameObject);
+		        		//Debug.Log( this.name + " is Scared and Stuck!", this.gameObject);
 		        		scaredStiffTimer = 0f;
 		        		PanicRoam();
 		        	}
@@ -375,27 +379,24 @@ public class NPCMove : MonoBehaviour
             }
             if(Min != null){
 	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
-		            fighting = true;
-		            anim.SetBool("IsFighting", true);
-	                //Debug.Log("Caught up to chasee", this.gameObject);
-	                
-	                //enable this if you want the chaser to have a hard time catching the runner,
-	                //basically slows down the chaser and speeds up the chase if they get close enough
-	                
-	                //Min.gameObject.GetComponent<NPCMove>().changeAgentSpeedToGiven(agent.speed * 1.5f);
-	                //changeAgentSpeedToGiven(Min.gameObject.GetComponent<NPCMove>().agent.speed * .75f);
-
-                }
+	            	
+		            fight.EnterFighting(Min);
+	            }
+	            else{
+	            	anim.SetBool("isFighting", false);
+	            }
 	            //VERY close, stop moving. This is meant to stop agents constantly running in place on top of eachother
-	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2f && Min.gameObject.GetComponent<NPCMove>().agent.velocity.magnitude < 1f){
-		            changeAgentSpeedToGiven(0f);
+	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 1.5f){
+		            fight.StartAttack();
 	            }
             }
         }
     }
+
     void resetRaycastBlock(){
         raycastBlock = false;
     }
+
 	void findEscape(){
 		scaredStiffTimer = 0f;
 		
@@ -565,7 +566,7 @@ public class NPCMove : MonoBehaviour
         scared = false;
     }
 
-	void changeAgentSpeedToGiven(float speed){
+	public void changeAgentSpeedToGiven(float speed){
 		//This seems to be running faster when running from sprint to default  
 		//then a good speed when going from default to sprint. idk??
 		if(Mathf.Approximately(Mathf. Round(speed * 100.0f) * 0.01f, Mathf. Round(agent.speed * 100.0f) * 0.01f))
@@ -580,7 +581,7 @@ public class NPCMove : MonoBehaviour
 		}
 
 	}
-	float fadeTimer = 1f;
+	float fadeTimer = .5f;
 	IEnumerator StartC(float newSpeed){
 		yield return StartCoroutine(Fade(newSpeed));
 	}
