@@ -374,6 +374,7 @@ public class NPCMove : MonoBehaviour
             else{
                 //Debug.Log(this.gameObject.name + "is a chaser and cant find any npc's");
                 //there are no NPC's near you
+                anim.SetBool("isFighting", false);
                 Roam();
                 chasing = false;
             }
@@ -386,7 +387,7 @@ public class NPCMove : MonoBehaviour
 	            	anim.SetBool("isFighting", false);
 	            }
 	            //VERY close, stop moving. This is meant to stop agents constantly running in place on top of eachother
-	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 1.5f){
+	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2f){
 		            fight.StartAttack();
 	            }
             }

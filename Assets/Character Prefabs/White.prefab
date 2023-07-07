@@ -862,7 +862,7 @@ MonoBehaviour:
   Min: {fileID: 0}
   fearRadius: 10
   detectRadius: 120
-  criticalDist: 2.5
+  criticalDist: 3.5
   roamTimerUp: 20
   roamTimerLow: 5
   raycastCapUpper: 0.8
@@ -875,7 +875,7 @@ MonoBehaviour:
   scary: 0
   attractive: 0
   chasing: 0
-  brave: 0
+  brave: 1
   scared: 0
   gate: 0
   scaredStiffCap: 2.5
@@ -934,6 +934,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hp: 100
   HitboxHandL: {fileID: 1020746424009034688}
   HitboxHandR: {fileID: 7243036542116590693}
   HitboxFootL: {fileID: 2913260737496340579}

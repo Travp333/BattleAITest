@@ -25736,6 +25736,13 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0
     functionName: DisableAllHitboxes
     data: 
     objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
@@ -25744,6 +25751,69 @@ AnimationClip:
     messageOptions: 0
   - time: 0.016666668
     functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.016666668
+    functionName: DisableAllHitboxes
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.033333335
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.033333335
+    functionName: DisableAllHitboxes
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.05
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.05
+    functionName: DisableAllHitboxes
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.06666667
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.06666667
+    functionName: DisableAllHitboxes
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.083333336
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.083333336
+    functionName: DisableAllHitboxes
     data: 
     objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
     floatParameter: 0

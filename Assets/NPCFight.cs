@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class NPCFight : MonoBehaviour
 {
+	NPCBehaviorChangersList list;
+	[SerializeField]
+	int hp = 100;
 	[SerializeField]
 	GameObject HitboxHandL, HitboxHandR, HitboxFootL, HitboxFootR;
 	int rand;
@@ -11,12 +14,29 @@ public class NPCFight : MonoBehaviour
 	bool isAttackingGate;
 	Animator anim;
 	int rand2;
+	bool injuredGate;
 	protected void Start()
 	{
+		foreach (GameObject g in GameObject.FindGameObjectsWithTag("EmptyScriptHolders") ){
+            if(g.GetComponent<NPCBehaviorChangersList>()!=null){
+                list = g.GetComponent<NPCBehaviorChangersList>();
+            }
+        }
 		move = this.GetComponent<NPCMove>();
 		anim = this.GetComponent<Animator>();
 	}
 	public void takeDamage(){
+		if(hp - 10 < 0){
+			hp = 0;
+		}
+		else {
+			hp = hp - 10;
+		}
+
+		if(hp == 0){
+			list.removeFromNPCS(this.gameObject);
+			Destroy(this.gameObject);
+		}
 		anim.SetBool("isTakingDamage", true);
 		anim.SetBool("isAttacking", false);
 		anim.SetBool("isHeavyAttack", false);
@@ -46,7 +66,8 @@ public class NPCFight : MonoBehaviour
 		isAttackingGate = false;
 	}
 	public void EnterFighting(GameObject Min){
-		move.changeAgentSpeedToGiven(Min.gameObject.GetComponent<NPCMove>().agent.speed * .5f);
+		//need to check in min, that being the npc this npc is targeting, to see if it is scared. If so, then we dont need the movement decrease on the attacker, just let them take em out
+		move.changeAgentSpeedToGiven(this.gameObject.GetComponent<NPCMove>().defaultSpeed * .5f);
 		anim.SetBool("isFighting", true);
 		            
 		//Debug.Log("Caught up to chasee", this.gameObject);
@@ -117,5 +138,21 @@ public class NPCFight : MonoBehaviour
 		HitboxHandR.SetActive(false);
 		HitboxFootL.SetActive(false);
 		HitboxFootR.SetActive(false);
+	}
+	/// <summary>
+	/// Update is called every frame, if the MonoBehaviour is enabled.
+	/// </summary>
+	void Update()
+	{
+		if(!injuredGate){
+			if (hp <= 10 && !move.brave){
+				injuredGate = true;
+				anim.SetBool("isFighting", false);
+				move.runner = true;
+				move.chaser = false;
+				move.runSpeed = move.runSpeed/2;
+				move.defaultSpeed = move.defaultSpeed/2;
+			}
+		}
 	}
 }
