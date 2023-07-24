@@ -15,6 +15,8 @@ public class NPCFight : MonoBehaviour
 	Animator anim;
 	int rand2;
 	bool injuredGate;
+	public bool invulnerabilityPeriod;
+	float invulnerabilityTimer = 1f;
 	protected void Start()
 	{
 		foreach (GameObject g in GameObject.FindGameObjectsWithTag("EmptyScriptHolders") ){
@@ -25,7 +27,12 @@ public class NPCFight : MonoBehaviour
 		move = this.GetComponent<NPCMove>();
 		anim = this.GetComponent<Animator>();
 	}
+	public void resetInvulnerabilityPeriod(){
+		invulnerabilityPeriod = false;
+	}
 	public void takeDamage(){
+		invulnerabilityPeriod = true;
+		Invoke("resetInvulnerabilityPeriod", invulnerabilityTimer);
 		if(hp - 10 < 0){
 			hp = 0;
 		}

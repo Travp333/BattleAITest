@@ -8,23 +8,21 @@ public class HitboxTrigger : MonoBehaviour
 	protected void OnTriggerEnter(Collider other)
 	{
 		if(other.gameObject != this.gameObject && other.gameObject.layer == 7){
-			Debug.Log(this.transform.root.gameObject.name + " Hit " + other.gameObject.name);
 			if (other.gameObject.GetComponent<NPCFight>() != null){
-				fight = other.gameObject.GetComponent<NPCFight>();
-				fight.takeDamage();
+				if (other.gameObject.GetComponent<NPCFight>().invulnerabilityPeriod == false){
+					Debug.Log(this.transform.root.gameObject.name + " Hit " + other.gameObject.name);
+					fight = other.gameObject.GetComponent<NPCFight>();
+					fight.takeDamage();
+				}
+			}
+			if (other.gameObject.transform.root.gameObject.GetComponent<NPCFight>() != null){
+				if (other.gameObject.transform.root.gameObject.GetComponent<NPCFight>().invulnerabilityPeriod == false){
+					Debug.Log(this.transform.root.gameObject.name + " Hit " + other.gameObject.name);
+					fight = other.gameObject.transform.root.gameObject.GetComponent<NPCFight>();
+					fight.takeDamage();
+				}
 			}
 		}
 	}
-	
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
