@@ -354,7 +354,7 @@ public class NPCMove : MonoBehaviour
                 NPCSearchCount = NPCSearchCount - searchCap;
             }
             if(Min != null){
-                //Debug.Log(this.gameObject.name + "is calculating a path to the nearest npc");
+	            //Debug.Log(this.gameObject.name + "is calculating a path to the nearest npc");
                 NavMesh.CalculatePath(this.transform.position, Min.transform.position, NavMesh.AllAreas, path);
             }
 

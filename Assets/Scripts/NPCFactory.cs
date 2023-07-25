@@ -6,8 +6,6 @@ using UnityEngine.AI;
 public class NPCFactory : MonoBehaviour
 {
     NPCBehaviorChangersList list;
-    [SerializeField]
-    int LifespanUpper, LifespanLower;
     NavMeshPath path;
     [SerializeField]
     Transform homeBeacon;
@@ -25,28 +23,28 @@ public class NPCFactory : MonoBehaviour
     float spawnTimerCount, searchCap = 1;
 
     void AssignRandomNpcTraits(GameObject g2){
-        int rand2 = Random.Range(0,150);
+	    // int rand2 = Random.Range(0,150);
         //probably a bit of a dumb way to do rng but i can change this later easy
-        if(rand2 == 5){
-            g2.GetComponent<NPCMove>().runner = true;
-        }
-        else if (rand2 == 6){
-            g2.GetComponent<NPCMove>().attractive = true;
-        }
-        else if (rand2 == 34){
-            g2.GetComponent<NPCMove>().runner = true;
-            g2.GetComponent<NPCMove>().attractive = true;
-        }
-        else if (rand2 == 12 || rand2 == 15 || rand2 == 100 || rand2 == 120 || rand2 == 122){
-            g2.GetComponent<NPCMove>().scary = true;
-        }
-        else if (rand2 == 150){
-            g2.GetComponent<NPCMove>().brave = true;
-        }
-        else if (rand2 == 69){
-            g2.GetComponent<NPCMove>().brave = true;
-            g2.GetComponent<NPCMove>().attractive = true;
-        }
+	    // if(rand2 == 5){
+	        //g2.GetComponent<NPCMove>().runner = true;
+	        // }
+	    // else if (rand2 == 6){
+	        //g2.GetComponent<NPCMove>().attractive = true;
+	        // }
+	    // else if (rand2 == 34){
+	        //g2.GetComponent<NPCMove>().runner = true;
+	        //g2.GetComponent<NPCMove>().attractive = true;
+	        // }
+	    //else if (rand2 == 12 || rand2 == 15 || rand2 == 100 || rand2 == 120 || rand2 == 122){
+	        //g2.GetComponent<NPCMove>().scary = true;
+	        //}
+	    //else if (rand2 == 150){
+	        //g2.GetComponent<NPCMove>().brave = true;
+	        //}
+	    //else if (rand2 == 69){
+	        //g2.GetComponent<NPCMove>().brave = true;
+	        //g2.GetComponent<NPCMove>().attractive = true;
+	        //}
     }
 
     public void DespawnNPC(GameObject g){
@@ -84,12 +82,12 @@ public class NPCFactory : MonoBehaviour
     void SpawnNPC(){
         Vector3 randPos = GetRandomPoint();
         GameObject g2 = Instantiate(NPCList[Random.Range(0, NPCList.Count)], randPos, Quaternion.identity);
-        AssignRandomNpcTraits(g2);
+	    //AssignRandomNpcTraits(g2);
     }
     void SpawnRandomLocationNpc(){
         Vector3 randPos = GetValidSpawnPoint();
         GameObject g2 = Instantiate(NPCList[Random.Range(0, NPCList.Count)], randPos, Quaternion.identity);
-        AssignRandomNpcTraits(g2);
+	    //AssignRandomNpcTraits(g2);
 
     }
 

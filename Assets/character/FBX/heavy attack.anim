@@ -52053,6 +52053,27 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0.65
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.6666667
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.68333334
+    functionName: resetIsAttacking
+    data: 
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.7
     functionName: resetIsAttacking
     data: 

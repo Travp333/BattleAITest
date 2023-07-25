@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class NPCFight : MonoBehaviour
 {
+	// make it so they cant move while attacking?
+	// make them back up a bit
+	// make them walk around and rotate around eachother essentially 
+	// apply knockback when taking damage
+	// implement dodging 
+	// implement blocking 
+	// implement ranged attackers
 	NPCBehaviorChangersList list;
 	[SerializeField]
 	int hp = 100;
@@ -11,12 +18,16 @@ public class NPCFight : MonoBehaviour
 	GameObject HitboxHandL, HitboxHandR, HitboxFootL, HitboxFootR;
 	int rand;
 	NPCMove move;
-	bool isAttackingGate;
 	Animator anim;
 	int rand2;
 	bool injuredGate;
 	public bool invulnerabilityPeriod;
-	float invulnerabilityTimer = 1f;
+	public float invulnerabilityTimer = 3f;
+	public bool attackCooldown;
+	public float attackCooldownTimer = 3f;
+	[SerializeField]
+	float knockBackForce = 250f;
+	Rigidbody body;
 	protected void Start()
 	{
 		foreach (GameObject g in GameObject.FindGameObjectsWithTag("EmptyScriptHolders") ){
@@ -26,13 +37,13 @@ public class NPCFight : MonoBehaviour
         }
 		move = this.GetComponent<NPCMove>();
 		anim = this.GetComponent<Animator>();
+		body = this.GetComponent<Rigidbody>();
 	}
-	public void resetInvulnerabilityPeriod(){
-		invulnerabilityPeriod = false;
-	}
-	public void takeDamage(){
+	public void takeDamage(Vector3 dir){
 		invulnerabilityPeriod = true;
-		Invoke("resetInvulnerabilityPeriod", invulnerabilityTimer);
+		invulnerabilityTimer = 3f;
+		attackCooldown = true;
+		attackCooldownTimer = 3f;
 		if(hp - 10 < 0){
 			hp = 0;
 		}
@@ -48,29 +59,35 @@ public class NPCFight : MonoBehaviour
 		anim.SetBool("isAttacking", false);
 		anim.SetBool("isHeavyAttack", false);
 		anim.SetBool("isLightAttack", false);
-		isAttackingGate = true;
 		rand2 = Random.Range(0,4);
 		if(rand2 == 0){
-			anim.SetInteger("whichFightIdleDamageAnim", 1);
+			anim.Play("fighting idle take damage");
+			body.AddForce(dir * knockBackForce);
+			//anim.SetInteger("whichFightIdleDamageAnim", 1);
 		}
 		if(rand2 == 1){
-			anim.SetInteger("whichFightIdleDamageAnim", 2);
+			anim.Play("fighting idle take damage 1");
+			body.AddForce(dir * knockBackForce);
+			//anim.SetInteger("whichFightIdleDamageAnim", 2);
 		}
 		if(rand2 == 2){
-			anim.SetInteger("whichFightIdleDamageAnim", 3);
+			anim.Play("fighting idle take damage 2");
+			body.AddForce(dir * knockBackForce);
+			//anim.SetInteger("whichFightIdleDamageAnim", 3);
 		}
 		if(rand2 == 3){
-			anim.SetInteger("whichFightIdleDamageAnim", 4);
+			anim.Play("fighting idle take damage 3");
+			body.AddForce(dir * knockBackForce);
+			//anim.SetInteger("whichFightIdleDamageAnim", 4);
 		}
 	}
 	
 	public void resetIsAttacking(){
-		//Debug.Log("Reset Attacking!");
+		Debug.Log("Reset Attacking!");
 		anim.SetBool("isTakingDamage", false);
 		anim.SetBool("isAttacking", false);
 		anim.SetBool("isHeavyAttack", false);
 		anim.SetBool("isLightAttack", false);
-		isAttackingGate = false;
 	}
 	public void EnterFighting(GameObject Min){
 		//need to check in min, that being the npc this npc is targeting, to see if it is scared. If so, then we dont need the movement decrease on the attacker, just let them take em out
@@ -94,31 +111,42 @@ public class NPCFight : MonoBehaviour
 	public void StartAttack(){
 		move.changeAgentSpeedToGiven(0f);
 		rand = Random.Range(0,4);
-		if(!isAttackingGate){
+		if(!attackCooldown){
 			anim.SetBool("isAttacking", true);
-			isAttackingGate = true;
 			Debug.Log("Attacking!");
 			if(rand == 0){
+				attackCooldown = true;
+				attackCooldownTimer = 5f;
+				//anim.Play("heavy attack");
 				anim.SetInteger("WhichHeavyAttackAnim", 1);
-				Debug.Log("Doing heavy attack!");
+				Debug.Log(this.gameObject.name + " is doing heavy attack!");
 				anim.SetBool("isHeavyAttack", true);
 				anim.SetBool("isLightAttack", false);
 			}
 			else if (rand == 1){
+				attackCooldown = true;
+				attackCooldownTimer = 3f;
+				//anim.Play("light attack");
 				anim.SetInteger("WhichLightAttackAnim", 1);
-				Debug.Log("Doing light attack!");
+				Debug.Log(this.gameObject.name + " is doing light attack!");
 				anim.SetBool("isLightAttack", true);
 				anim.SetBool("isHeavyAttack", false);
 			}
 			else if (rand == 2){
+				attackCooldown = true;
+				attackCooldownTimer = 5f;
+				//anim.Play("heavy attack alt");
 				anim.SetInteger("WhichHeavyAttackAnim", 2);
-				Debug.Log("Doing heavy attack #2!");
+				Debug.Log(this.gameObject.name + " is doing heavy attack #2!");
 				anim.SetBool("isLightAttack", false);
 				anim.SetBool("isHeavyAttack", true);
 			}
 			else if (rand == 3){
+				attackCooldown = true;
+				attackCooldownTimer = 3f;
+				//anim.Play("light attack variant");
 				anim.SetInteger("WhichLightAttackAnim", 2);
-				Debug.Log("Doing light attack #2!");
+				Debug.Log(this.gameObject.name + " is doing light attack #2!");
 				anim.SetBool("isLightAttack", true);
 				anim.SetBool("isHeavyAttack", false);
 
@@ -151,6 +179,20 @@ public class NPCFight : MonoBehaviour
 	/// </summary>
 	void Update()
 	{
+		if(attackCooldown){
+			attackCooldownTimer = attackCooldownTimer - Time.deltaTime;
+			if(attackCooldownTimer <= 0f){
+				attackCooldown = false;
+				attackCooldownTimer = 0f;
+			}
+		}
+		if(invulnerabilityPeriod){
+			invulnerabilityTimer = invulnerabilityTimer - Time.deltaTime;
+			if(invulnerabilityTimer <= 0f){
+				invulnerabilityPeriod = false;
+				invulnerabilityTimer = 0f;
+			}
+		}
 		if(!injuredGate){
 			if (hp <= 10 && !move.brave){
 				injuredGate = true;
