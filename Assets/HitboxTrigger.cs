@@ -12,7 +12,7 @@ public class HitboxTrigger : MonoBehaviour
 			//for capsule collision
 			if (other.gameObject.GetComponent<NPCFight>() != null){
 				if (other.gameObject.GetComponent<NPCFight>().invulnerabilityPeriod == false){
-					Debug.Log(this.transform.root.gameObject.name + " Hit " + other.gameObject.name);
+					//Debug.Log(this.transform.root.gameObject.name + " Hit " + other.gameObject.name);
 					fight = other.gameObject.GetComponent<NPCFight>();
 					dist = this.transform.root.forward;
 					fight.takeDamage(dist);
@@ -21,7 +21,7 @@ public class HitboxTrigger : MonoBehaviour
 			//for hitbox collision
 			if (other.gameObject.transform.root.gameObject.GetComponent<NPCFight>() != null){
 				if (other.gameObject.transform.root.gameObject.GetComponent<NPCFight>().invulnerabilityPeriod == false){
-					Debug.Log(this.transform.root.gameObject.name + " Hit " + other.gameObject.name);
+					//Debug.Log(this.transform.root.gameObject.name + " Hit " + other.gameObject.name);
 					fight = other.gameObject.transform.root.gameObject.GetComponent<NPCFight>();
 					dist = this.transform.root.forward;
 					fight.takeDamage(dist);

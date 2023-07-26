@@ -91,8 +91,13 @@ public class NPCMove : MonoBehaviour
 	bool isAttackingGate;
 	int rand;
 	NPCFight fight;
+	Rigidbody body;
+	public GameObject targeting;
+	public GameObject targetedBy;
+	int dodgeBlockOrNone;
     void Start()
 	{
+		body = this.GetComponent<Rigidbody>();
 		fight = this.GetComponent<NPCFight>();
 		anim = this.gameObject.GetComponent<Animator>();
 		runSpeed = Random.Range(runSpeedLower, runSpeedUpper);
@@ -378,9 +383,14 @@ public class NPCMove : MonoBehaviour
                 Roam();
                 chasing = false;
             }
-            if(Min != null){
+	        if(Min != null){
+		        //this is meant to allow the agent to be aware of when it is being targeted, this way it can choose to dodge or block the attack
+		        //a potential downside to this method is there is only one slot, so if multiple agents are targeting this agent it may become confused
 	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
-	            	
+	            	targeting = Min;
+	            	if( Min.gameObject.GetComponent<NPCMove>() != null ){
+		            	Min.gameObject.GetComponent<NPCMove>().targetedBy = this.gameObject;
+	            	}
 		            fight.EnterFighting(Min);
 	            }
 	            else{
@@ -388,8 +398,42 @@ public class NPCMove : MonoBehaviour
 	            }
 	            //VERY close, stop moving. This is meant to stop agents constantly running in place on top of eachother
 	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2f){
-		            fight.StartAttack();
+		            //	agent.updateRotation=true; 
+	            	agent.SetDestination(this.transform.position);
+	            	changeAgentSpeedToGiven(0f);
+	            	fight.StartAttack();
+	            	
+	            	//if(targetedBy.GetComponent<Animator>() != null){
+	            	//	if(targetedBy.GetComponent<Animator>().GetBool("isAttacking")){
+	            	//		dodgeBlockOrNone = Random.Range(0,5);
+	            	//		if(dodgeBlockOrNone == 0){
+	            	//			fight.startDodge();
+		            //		}
+	            	//		if(dodgeBlockOrNone == 1){
+	            	//			fight.startBlock();
+		            //		}
+	            	//		if(dodgeBlockOrNone == 2 || dodgeBlockOrNone == 3 || dodgeBlockOrNone == 4){
+	            	//			fight.StartAttack();
+		            //		}
+		        //	}
+		            //	else{
+	            	//		fight.StartAttack();
+		            //}
+		            //}
+		            
 	            }
+	            //VERY VERY close
+	            //if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2.05f){
+	            //	Debug.Log(this.gameObject.name + " is moving back", this.gameObject);
+	            //	agent.updateRotation=false; 
+	            //	body.AddForce((this.transform.position - Min.transform.position));
+	            	//agent.SetDestination(-this.transform.forward * 100f);
+	            	//agent.Move(-this.transform.forward);
+		            //Back up?
+	            // }
+	            // else{
+	            // 	agent.updateRotation=true; 
+	            // }
             }
         }
     }
@@ -400,9 +444,6 @@ public class NPCMove : MonoBehaviour
 
 	void findEscape(){
 		scaredStiffTimer = 0f;
-		
-		//THIS MAY BE ABLE TO BE OPTIMIZED WITH TIMERS, SIMILAR TO HOW IT IS USED ABOVE
-		
 		//Debug.Log(this.gameObject.name + "is finding escape");
 		//if you are not a runner, you are running from the closest scary NPC
 		//if(!runner){

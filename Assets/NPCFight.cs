@@ -7,10 +7,12 @@ public class NPCFight : MonoBehaviour
 	// make it so they cant move while attacking?
 	// make them back up a bit
 	// make them walk around and rotate around eachother essentially 
-	// apply knockback when taking damage
 	// implement dodging 
 	// implement blocking 
 	// implement ranged attackers
+	// implement ragdolls
+	// uppercut knocks enemies in the air?\
+	// different attacks depending on range? uppercut misses a lot
 	NPCBehaviorChangersList list;
 	[SerializeField]
 	int hp = 100;
@@ -83,7 +85,7 @@ public class NPCFight : MonoBehaviour
 	}
 	
 	public void resetIsAttacking(){
-		Debug.Log("Reset Attacking!");
+		//Debug.Log("Reset Attacking!");
 		anim.SetBool("isTakingDamage", false);
 		anim.SetBool("isAttacking", false);
 		anim.SetBool("isHeavyAttack", false);
@@ -113,13 +115,13 @@ public class NPCFight : MonoBehaviour
 		rand = Random.Range(0,4);
 		if(!attackCooldown){
 			anim.SetBool("isAttacking", true);
-			Debug.Log("Attacking!");
+			//Debug.Log("Attacking!");
 			if(rand == 0){
 				attackCooldown = true;
 				attackCooldownTimer = 5f;
 				//anim.Play("heavy attack");
 				anim.SetInteger("WhichHeavyAttackAnim", 1);
-				Debug.Log(this.gameObject.name + " is doing heavy attack!");
+				//Debug.Log(this.gameObject.name + " is doing heavy attack!");
 				anim.SetBool("isHeavyAttack", true);
 				anim.SetBool("isLightAttack", false);
 			}
@@ -128,7 +130,7 @@ public class NPCFight : MonoBehaviour
 				attackCooldownTimer = 3f;
 				//anim.Play("light attack");
 				anim.SetInteger("WhichLightAttackAnim", 1);
-				Debug.Log(this.gameObject.name + " is doing light attack!");
+				//Debug.Log(this.gameObject.name + " is doing light attack!");
 				anim.SetBool("isLightAttack", true);
 				anim.SetBool("isHeavyAttack", false);
 			}
@@ -137,7 +139,7 @@ public class NPCFight : MonoBehaviour
 				attackCooldownTimer = 5f;
 				//anim.Play("heavy attack alt");
 				anim.SetInteger("WhichHeavyAttackAnim", 2);
-				Debug.Log(this.gameObject.name + " is doing heavy attack #2!");
+				//Debug.Log(this.gameObject.name + " is doing heavy attack #2!");
 				anim.SetBool("isLightAttack", false);
 				anim.SetBool("isHeavyAttack", true);
 			}
@@ -146,7 +148,7 @@ public class NPCFight : MonoBehaviour
 				attackCooldownTimer = 3f;
 				//anim.Play("light attack variant");
 				anim.SetInteger("WhichLightAttackAnim", 2);
-				Debug.Log(this.gameObject.name + " is doing light attack #2!");
+				//Debug.Log(this.gameObject.name + " is doing light attack #2!");
 				anim.SetBool("isLightAttack", true);
 				anim.SetBool("isHeavyAttack", false);
 
@@ -155,6 +157,12 @@ public class NPCFight : MonoBehaviour
 
 		}
 		            
+	}
+	public void startDodge(){
+		
+	}
+	public void startBlock(){
+		anim.SetBool("isBlocking", true);
 	}
 	void EnableHitboxHandL(){
 		HitboxHandL.SetActive(true);
