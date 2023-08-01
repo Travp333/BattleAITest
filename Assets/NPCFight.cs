@@ -1,22 +1,28 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class NPCFight : MonoBehaviour
 {
-	// make it so they cant move while attacking?
 	// make them back up a bit
-	// make them walk around and rotate around eachother essentially 
+	// make them walk around and rotate around eachother essentially (maybe only when blocking?)
 	// implement dodging 
 	// implement blocking 
 	// implement ranged attackers
 	// implement ragdolls
 	// uppercut knocks enemies in the air?\
 	// different attacks depending on range? uppercut misses a lot
+	// REDO ANIMATIONS FOR KICK AND UPPERCUT THEY BOTH MISS A LOT
+	// add a "onGround" check, this will be tough but try and recreate the logic from catlike. This would be very helpful for air launches and such
+	// in chivalry, ranged agents will switch to a weaker close range attack when pressed. Maybe here theres a chance they will do that or run away, dependent on if theyre a coward or not. same roll as running away when low health
+	// im thinking that the reverse can be true of agents here, everyone has a few ranged attacks. This way when an agent is scared for their life and running away they can easily hit them with a ranged attack
 	NPCBehaviorChangersList list;
 	[SerializeField]
+	[Tooltip("Health")]
 	int hp = 100;
 	[SerializeField]
+	[Tooltip("Hitboxes")]
 	GameObject HitboxHandL, HitboxHandR, HitboxFootL, HitboxFootR;
 	int rand;
 	NPCMove move;
@@ -24,12 +30,20 @@ public class NPCFight : MonoBehaviour
 	int rand2;
 	bool injuredGate;
 	public bool invulnerabilityPeriod;
-	public float invulnerabilityTimer = 3f;
+	public float invulnerabilityTimer = 0f;
 	public bool attackCooldown;
 	public float attackCooldownTimer = 3f;
 	[SerializeField]
+	[Tooltip("how far back an agent gets knocked when taking damage (should probably flip this so it depends on the attack rather than the victim)")]
 	float knockBackForce = 250f;
 	Rigidbody body;
+	NavMeshAgent agent;
+	bool agentDisable;
+	[SerializeField]
+	[Tooltip("amount of time the AI agent is disabled when taking damage")]
+	float agentDisableTimerCap;
+	float agentDisableTimer;
+	Quaternion rotation;
 	protected void Start()
 	{
 		foreach (GameObject g in GameObject.FindGameObjectsWithTag("EmptyScriptHolders") ){
@@ -37,15 +51,25 @@ public class NPCFight : MonoBehaviour
                 list = g.GetComponent<NPCBehaviorChangersList>();
             }
         }
+		agent = this.GetComponent<NavMeshAgent>();
 		move = this.GetComponent<NPCMove>();
 		anim = this.GetComponent<Animator>();
 		body = this.GetComponent<Rigidbody>();
 	}
 	public void takeDamage(Vector3 dir){
 		invulnerabilityPeriod = true;
-		invulnerabilityTimer = 3f;
+		invulnerabilityTimer = 0f;
 		attackCooldown = true;
 		attackCooldownTimer = 3f;
+		//===================
+		//this was an attempt at making agents turn off their AI when damaged, to allow for falling off cliffs and knockup damage
+		//agent.updatePosition = false;
+		//agent.updateRotation = false;
+		//agent.enabled = false;
+		//rotation = this.transform.rotation;
+		//agentDisable = true;
+		//agentDisableTimer = agentDisableTimerCap;
+		//===================
 		if(hp - 10 < 0){
 			hp = 0;
 		}
@@ -211,5 +235,19 @@ public class NPCFight : MonoBehaviour
 				move.defaultSpeed = move.defaultSpeed/2;
 			}
 		}
+		//===================
+		//this was an attempt at making agents turn off their AI when damaged, to allow for falling off cliffs and knockup damage
+		//if(agentDisable){
+		//	agentDisableTimer = agentDisableTimer - Time.deltaTime;
+		//	this.transform.rotation = rotation;
+		//	if(agentDisableTimer <= 0f){
+		//		agent.updatePosition = true;
+		//		agent.updateRotation = true;
+		//		agentDisable = false;
+		//		//agent.enabled = true;
+		//		agentDisableTimer = 0f;
+		//	}
+		//}
+		//===================
 	}
 }

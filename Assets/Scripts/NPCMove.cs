@@ -93,7 +93,8 @@ public class NPCMove : MonoBehaviour
 	NPCFight fight;
 	Rigidbody body;
 	public GameObject targeting;
-	public GameObject targetedBy;
+    [SerializeField]
+    public List<GameObject> targetedBy = new List<GameObject>();
 	int dodgeBlockOrNone;
     void Start()
 	{
@@ -385,12 +386,30 @@ public class NPCMove : MonoBehaviour
             }
 	        if(Min != null){
 		        //this is meant to allow the agent to be aware of when it is being targeted, this way it can choose to dodge or block the attack
-		        //a potential downside to this method is there is only one slot, so if multiple agents are targeting this agent it may become confused
+		        //checking if this agent was previously targeting another agent. If so, update that agents targeted by list to remove this agent before tageting a new agent
 	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
-	            	targeting = Min;
-	            	if( Min.gameObject.GetComponent<NPCMove>() != null ){
-		            	Min.gameObject.GetComponent<NPCMove>().targetedBy = this.gameObject;
+                    // was this agent previously targeting another agent?
+                    if(targeting != null){
+                        // is this agent in that other agents targeted by list (should always be true, i cant think of a case where it wouldnt be)
+                        if(targeting.GetComponent<NPCMove>().targetedBy.Contains(this.gameObject)){
+                            //remove this agent from the other agents targetedby list
+                            targeting.GetComponent<NPCMove>().targetedBy.Remove(this.gameObject);
+                        }
+                        else{
+                            //something big time messed up
+                            Debug.Log("something wrong with updating targetedbylist");
+                        }
+                    }
+                    //assign new target and updating targetedby list
+                    if(Min.gameObject.GetComponent<NPCMove>() != null ){
+                        //updating this agents targeting list
+                        targeting = Min;
+                        //updating the targeted agent's targeted by list
+                        targeting.gameObject.GetComponent<NPCMove>().targetedBy.Add(this.gameObject);
 	            	}
+                    
+	            	
+
 		            fight.EnterFighting(Min);
 	            }
 	            else{

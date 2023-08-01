@@ -909,6 +909,8 @@ MonoBehaviour:
   critDistRotateTimer: 0
   CritDistRotateCap: 5
   fighting: 0
+  targeting: {fileID: 0}
+  targetedBy: []
 --- !u!114 &6165444659557309713
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -971,6 +973,7 @@ MonoBehaviour:
   attackCooldown: 0
   attackCooldownTimer: 1
   knockBackForce: 250
+  agentDisableTimerCap: 2
 --- !u!1 &2493467487748211944
 GameObject:
   m_ObjectHideFlags: 0
