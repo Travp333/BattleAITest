@@ -306,6 +306,7 @@ public class NPCMove : MonoBehaviour
 
             }
 	        if(scared){
+                Debug.Log("TEST! I AM SCARTEDD!!", this.gameObject);
 	        	//checking if some pathfinding stuff got messed up, basically if a scared agent is stuck 
 	        	//against a wall or something send them to panicRoam so they escape
 		        if(agent.velocity.magnitude < 1f){

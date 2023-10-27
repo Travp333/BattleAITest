@@ -53446,14 +53446,14 @@ AnimationClip:
   - time: 0.13333334
     functionName: EnableHitboxHandL
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 0.21666667
     functionName: DisableAllHitboxes
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: 11500000, guid: 7b6a9008921ba68448e22b538543e7a8, type: 3}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

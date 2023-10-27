@@ -902,7 +902,7 @@ MonoBehaviour:
   scary: 0
   attractive: 0
   chasing: 0
-  brave: 1
+  brave: 0
   scared: 0
   gate: 0
   scaredStiffCap: 2.5
@@ -969,10 +969,10 @@ MonoBehaviour:
   HitboxFootL: {fileID: 2913260737496340579}
   HitboxFootR: {fileID: 3421431385967677058}
   invulnerabilityPeriod: 0
-  invulnerabilityTimer: 3
+  invulnerabilityTimer: 1
   attackCooldown: 0
-  attackCooldownTimer: 3
-  knockBackForce: 250
+  attackCooldownTimer: 1
+  knockBackForce: 100
   agentDisableTimerCap: 2
 --- !u!1 &2493467487748211944
 GameObject:
