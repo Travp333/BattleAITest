@@ -225,16 +225,17 @@ public class NPCFight : MonoBehaviour
 				invulnerabilityTimer = 0f;
 			}
 		}
-		if(!injuredGate){
-			if (hp <= 10 && !move.brave){
-				injuredGate = true;
-				anim.SetBool("isFighting", false);
-				move.runner = true;
-				move.chaser = false;
-				move.runSpeed = move.runSpeed/2;
-				move.defaultSpeed = move.defaultSpeed/2;
-			}
-		}
+		//RUN AWAY WHEN INJURED
+		//if(!injuredGate){
+			//if (hp <= 10 && !move.brave){
+			//	injuredGate = true;
+			//	anim.SetBool("isFighting", false);
+			//	move.runner = true;
+			//	move.chaser = false;
+			//	move.runSpeed = move.runSpeed/2;
+			//	move.defaultSpeed = move.defaultSpeed/2;
+			//}
+		//}
 		//===================
 		//this was an attempt at making agents turn off their AI when damaged, to allow for falling off cliffs and knockup damage
 		//if(agentDisable){

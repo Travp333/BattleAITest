@@ -75,7 +75,7 @@ public class NPCMove : MonoBehaviour
     float roamTimer;
     NPCBehaviorChangersList list;
     [SerializeField]
-	public bool chaser, runner, scary, attractive, chasing, brave, scared, gate;
+	public bool runner, scary, attractive, chasing, brave, scared, gate;
     NPCFactory fact;
 	float tempSpeed;
 	float scaredStiffTimer = 1f;
@@ -191,7 +191,7 @@ public class NPCMove : MonoBehaviour
         if(list.nonScaryNPCs.Count > 0){
             foreach (GameObject g in list.nonScaryNPCs){
                 float dist = Vector3.Distance(g.gameObject.transform.position, currentPos);
-	            if (dist < minDist && g != this.gameObject && !g.GetComponent<NPCMove>().chaser){
+	            if (dist < minDist && g != this.gameObject){
                     Min = g;
                     minDist = dist;
                 }
@@ -234,134 +234,128 @@ public class NPCMove : MonoBehaviour
 	// float debugCap = 0.5f;
     void Update()
     {
-	    // debugCount += Time.deltaTime;
-	    // if(debugCount >= debugCap){
-	        //     debugCount = 0.5f;
-	        //changeDebugText();
-	        // }
-        if(!chaser && !scary){
-            //Debug.Log(this.gameObject.name + "is not a chaser and is not scary");
-            if(list.scary.Count > 0 && !runner){
-                //Debug.Log(this.gameObject.name + "knows there is a scary agent somewhere");
-                //there are scary npcs on the level somewhere, find the closest one
-                scarySearchCount += Time.deltaTime;
-                if(scarySearchCount >= searchCap){
-                    //find the closest one, once per second
-                    GetClosestScary();
-                    //Debug.Log(this.gameObject.name + "is calculating a path away from " + Min.gameObject.name);
-                    scarySearchCount = scarySearchCount - searchCap;
-                    //calculate a path away from that scary NPC
-                }
-                if(Min != null){
-                    NavMesh.CalculatePath(Min.transform.position, this.transform.position , NavMesh.AllAreas, path);
-                    float dist = Vector3.Distance(this.transform.position, Min.transform.position);
+        if(list.scary.Count > 0 && !runner){
+            //Debug.Log(this.gameObject.name + "knows there is a scary agent somewhere");
+            //there are scary npcs on the level somewhere, find the closest one
+            scarySearchCount += Time.deltaTime;
+            if(scarySearchCount >= searchCap){
+                //find the closest one, once per second
+                GetClosestScary();
+                //Debug.Log(this.gameObject.name + "is calculating a path away from " + Min.gameObject.name);
+                scarySearchCount = scarySearchCount - searchCap;
+                //calculate a path away from that scary NPC
+            }
+            if(Min != null){
+                NavMesh.CalculatePath(Min.transform.position, this.transform.position , NavMesh.AllAreas, path);
+                float dist = Vector3.Distance(this.transform.position, Min.transform.position);
 
-                    if(dist > fearRadius && scared){
-                        updateCount = updateCount + Time.deltaTime;
-                        if(updateCount >= updateCap){
-                            //Debug.Log("Reset Scared!");
-                            resetScared();
-                            updateCount = updateCount - updateCap;
-                            Roam();
-                        }
-                    }
-                    else if(dist < fearRadius && path.status == NavMeshPathStatus.PathComplete){ 
-                        //Debug.Log("VALID ROUTE");
-                        //There are Scary NPCS in the level, and one is near you
-                        //Debug.Log(this.gameObject.name + "is near a scary NPC");
-                        setScared();
+                if(dist > fearRadius && scared){
+                    updateCount = updateCount + Time.deltaTime;
+                    if(updateCount >= updateCap){
+                        //Debug.Log("Reset Scared!");
+                        resetScared();
+                        updateCount = updateCount - updateCap;
+                        Roam();
                     }
                 }
-            }
-	        //if you are a runner, just find the nearest NPC and run away from them
-            if(runner){
-                //Debug.Log("I AM RUNNER", this.gameObject);
-                NPCSearchCount += Time.deltaTime;
-	            if(NPCSearchCount >= searchCap && !scared){
-                    //find the closest one, once per second
-	                GetClosestEnemyNPC();
-                    //Debug.Log(this.gameObject.name + "is calculating a path away from " + Min.gameObject.name);
-                    NPCSearchCount = NPCSearchCount - searchCap;
-                    //calculate a path away from that scary NPC
-                }
-                if(Min != null){
-                    NavMesh.CalculatePath(Min.transform.position, this.transform.position , NavMesh.AllAreas, path);
-                    float dist = Vector3.Distance(this.transform.position, Min.transform.position);
-                    if(dist > fearRadius && scared){
-                        updateCount = updateCount + Time.deltaTime;
-                        if(updateCount >= updateCap){
-                            //Debug.Log("Reset Scared!");
-                            resetScared();
-                            updateCount = updateCount - updateCap;
-                            Roam();
-                        }
-                    }
-                    else if(dist < fearRadius && path.status == NavMeshPathStatus.PathComplete){ 
-                        //Debug.Log("VALID ROUTE");
-                        //There are Scary NPCS in the level, and one is near you
-                        //Debug.Log(this.gameObject.name + "is near a scary NPC");
-                        setScared();
-                    }
-                }
-
-            }
-	        if(scared){
-                Debug.Log("TEST! I AM SCARTEDD!!", this.gameObject);
-	        	//checking if some pathfinding stuff got messed up, basically if a scared agent is stuck 
-	        	//against a wall or something send them to panicRoam so they escape
-		        if(agent.velocity.magnitude < 1f){
-		        	scaredStiffTimer += Time.deltaTime;
-		        	if(scaredStiffTimer > scaredStiffCap){
-		        		//Debug.Log( this.name + " is Scared and Stuck!", this.gameObject);
-		        		scaredStiffTimer = 0f;
-		        		PanicRoam();
-		        	}
-		        }
-		        else{
-		        	findEscape();
-		        }
-            }
-            else if(!scared && !chaser && !attractive){
-                //Debug.Log(this.gameObject.name + "is not scared or a chaser");
-                //check for attractive NPCS
-                AttractiveSearchCount += Time.deltaTime;
-                if(AttractiveSearchCount >= searchCap){
-                    GetClosestAttractive();
-                    AttractiveSearchCount = AttractiveSearchCount - searchCap;
-                }
-                if(Min != null){
-                    //Debug.Log(this.gameObject.name + "found a nearby attractive npc, " + Min.gameObject.name);
-                    NavMesh.CalculatePath(this.transform.position, Min.transform.position, NavMesh.AllAreas, path);
-                }
-                if((Min != null && path.status == NavMeshPathStatus.PathComplete && Vector3.Distance(this.transform.position, Min.transform.position) <= detectRadius && !runner) && list.attractive.Count > 0){
-                    //Debug.Log("there are attractive NPCS in the level, finding path to closest one");
-                    //there are attractive NPCS in the level, finding path to closest one
-                    agent.ResetPath();
-                    agent.SetPath(path);
-                    changeAgentSpeedToGiven(runSpeed);
-                    //tempSpeed = agent.speed;
-                    //StopAllCoroutines();
-                    //StartCoroutine(Fade(runSpeed));
-                    //agent.speed = runSpeed;
-                    chasing = true;
-                }
-                else{
-                    //there are no attractive NPC's near you
-                    //Debug.Log(this.gameObject.name + "is not scared or a chaser or near any attractive npc's, roaming");
-                    Roam();
-                    chasing = false;
+                else if(dist < fearRadius && path.status == NavMeshPathStatus.PathComplete){ 
+                    //Debug.Log("VALID ROUTE");
+                    //There are Scary NPCS in the level, and one is near you
+                    //Debug.Log(this.gameObject.name + "is near a scary NPC");
+                    setScared();
                 }
             }
         }
-        else if(chaser){
-            //Debug.Log(this.gameObject.name + "is a chaser");
+        //if you are a runner, just find the nearest NPC and run away from them
+        if(runner){
+            //Debug.Log("I AM RUNNER", this.gameObject);
+            NPCSearchCount += Time.deltaTime;
+            if(NPCSearchCount >= searchCap && !scared){
+                //find the closest one, once per second
+                GetClosestEnemyNPC();
+                //Debug.Log(this.gameObject.name + "is calculating a path away from " + Min.gameObject.name);
+                NPCSearchCount = NPCSearchCount - searchCap;
+                //calculate a path away from that scary NPC
+            }
+            if(Min != null){
+                NavMesh.CalculatePath(Min.transform.position, this.transform.position , NavMesh.AllAreas, path);
+                float dist = Vector3.Distance(this.transform.position, Min.transform.position);
+                if(dist > fearRadius && scared){
+                    updateCount = updateCount + Time.deltaTime;
+                    if(updateCount >= updateCap){
+                        //Debug.Log("Reset Scared!");
+                        resetScared();
+                        updateCount = updateCount - updateCap;
+                        Roam();
+                    }
+                }
+                else if(dist < fearRadius && path.status == NavMeshPathStatus.PathComplete){ 
+                    //Debug.Log("VALID ROUTE");
+                    //There are Scary NPCS in the level, and one is near you
+                    //Debug.Log(this.gameObject.name + "is near a scary NPC");
+                    setScared();
+                }
+            }
+
+        }
+        if(scared){
+            Debug.Log("TEST! I AM SCARTEDD!!", this.gameObject);
+            //checking if some pathfinding stuff got messed up, basically if a scared agent is stuck 
+            //against a wall or something send them to panicRoam so they escape
+            if(agent.velocity.magnitude < 1f){
+                scaredStiffTimer += Time.deltaTime;
+                if(scaredStiffTimer > scaredStiffCap){
+                    //Debug.Log( this.name + " is Scared and Stuck!", this.gameObject);
+                    scaredStiffTimer = 0f;
+                    PanicRoam();
+                }
+            }
+            else{
+                findEscape();
+            }
+        }
+
+        //ATTRACTIVE NPCs need a combat rework, so for now they are removed
+
+        //else if(!scared && !attractive){
+            //Debug.Log(this.gameObject.name + "is not scared");
+            //check for attractive NPCS
+            //AttractiveSearchCount += Time.deltaTime;
+           // if(AttractiveSearchCount >= searchCap){
+            //    GetClosestAttractive();
+           //     AttractiveSearchCount = AttractiveSearchCount - searchCap;
+           // }
+          //  if(Min != null){
+                //Debug.Log(this.gameObject.name + "found a nearby attractive npc, " + Min.gameObject.name);
+          //      NavMesh.CalculatePath(this.transform.position, Min.transform.position, NavMesh.AllAreas, path);
+          //  }
+         //   if((Min != null && path.status == NavMeshPathStatus.PathComplete && Vector3.Distance(this.transform.position, Min.transform.position) <= detectRadius && !runner) && list.attractive.Count > 0){
+                //Debug.Log("there are attractive NPCS in the level, finding path to closest one");
+                //there are attractive NPCS in the level, finding path to closest one
+         //       agent.ResetPath();
+        //        agent.SetPath(path);
+        //        changeAgentSpeedToGiven(runSpeed);
+                //tempSpeed = agent.speed;
+                //StopAllCoroutines();
+                //StartCoroutine(Fade(runSpeed));
+                //agent.speed = runSpeed;
+       //         chasing = true;
+       //     }
+      //      else{
+                //there are no attractive NPC's near you
+                //Debug.Log(this.gameObject.name + "is not scared or near any attractive npc's, roaming");
+      //          Roam();
+       //         chasing = false;
+       //     }
+      //  }
+      else{
             NPCSearchCount += Time.deltaTime;
             if(NPCSearchCount >= searchCap){
-	            GetClosestEnemyNPC();
+                GetClosestEnemyNPC();
                 NPCSearchCount = NPCSearchCount - searchCap;
             }
             if(Min != null){
-	            //Debug.Log(this.gameObject.name + "is calculating a path to the nearest npc");
+                //Debug.Log(this.gameObject.name + "is calculating a path to the nearest npc");
                 NavMesh.CalculatePath(this.transform.position, Min.transform.position, NavMesh.AllAreas, path);
             }
 
@@ -385,10 +379,10 @@ public class NPCMove : MonoBehaviour
                 Roam();
                 chasing = false;
             }
-	        if(Min != null){
-		        //this is meant to allow the agent to be aware of when it is being targeted, this way it can choose to dodge or block the attack
-		        //checking if this agent was previously targeting another agent. If so, update that agents targeted by list to remove this agent before tageting a new agent
-	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
+            if(Min != null){
+                //this is meant to allow the agent to be aware of when it is being targeted, this way it can choose to dodge or block the attack
+                //checking if this agent was previously targeting another agent. If so, update that agents targeted by list to remove this agent before tageting a new agent
+                if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist){
                     // was this agent previously targeting another agent?
                     if(targeting != null){
                         // is this agent in that other agents targeted by list (should always be true, i cant think of a case where it wouldnt be)
@@ -407,53 +401,53 @@ public class NPCMove : MonoBehaviour
                         targeting = Min;
                         //updating the targeted agent's targeted by list
                         targeting.gameObject.GetComponent<NPCMove>().targetedBy.Add(this.gameObject);
-	            	}
+                    }
                     
-	            	
+                    
 
-		            fight.EnterFighting(Min);
-	            }
-	            else{
-	            	anim.SetBool("isFighting", false);
-	            }
-	            //VERY close, stop moving. This is meant to stop agents constantly running in place on top of eachother
-	            if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2f){
-		            //	agent.updateRotation=true; 
-	            	agent.SetDestination(this.transform.position);
-	            	changeAgentSpeedToGiven(0f);
-	            	fight.StartAttack();
-	            	
-	            	//if(targetedBy.GetComponent<Animator>() != null){
-	            	//	if(targetedBy.GetComponent<Animator>().GetBool("isAttacking")){
-	            	//		dodgeBlockOrNone = Random.Range(0,5);
-	            	//		if(dodgeBlockOrNone == 0){
-	            	//			fight.startDodge();
-		            //		}
-	            	//		if(dodgeBlockOrNone == 1){
-	            	//			fight.startBlock();
-		            //		}
-	            	//		if(dodgeBlockOrNone == 2 || dodgeBlockOrNone == 3 || dodgeBlockOrNone == 4){
-	            	//			fight.StartAttack();
-		            //		}
-		        //	}
-		            //	else{
-	            	//		fight.StartAttack();
-		            //}
-		            //}
-		            
-	            }
-	            //VERY VERY close
-	            //if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2.05f){
-	            //	Debug.Log(this.gameObject.name + " is moving back", this.gameObject);
-	            //	agent.updateRotation=false; 
-	            //	body.AddForce((this.transform.position - Min.transform.position));
-	            	//agent.SetDestination(-this.transform.forward * 100f);
-	            	//agent.Move(-this.transform.forward);
-		            //Back up?
-	            // }
-	            // else{
-	            // 	agent.updateRotation=true; 
-	            // }
+                    fight.EnterFighting(Min);
+                }
+                else{
+                    anim.SetBool("isFighting", false);
+                }
+                //VERY close, stop moving. This is meant to stop agents constantly running in place on top of eachother
+                if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2f){
+                    //	agent.updateRotation=true; 
+                    agent.SetDestination(this.transform.position);
+                    changeAgentSpeedToGiven(0f);
+                    fight.StartAttack();
+                    
+                    //if(targetedBy.GetComponent<Animator>() != null){
+                    //	if(targetedBy.GetComponent<Animator>().GetBool("isAttacking")){
+                    //		dodgeBlockOrNone = Random.Range(0,5);
+                    //		if(dodgeBlockOrNone == 0){
+                    //			fight.startDodge();
+                    //		}
+                    //		if(dodgeBlockOrNone == 1){
+                    //			fight.startBlock();
+                    //		}
+                    //		if(dodgeBlockOrNone == 2 || dodgeBlockOrNone == 3 || dodgeBlockOrNone == 4){
+                    //			fight.StartAttack();
+                    //		}
+                //	}
+                    //	else{
+                    //		fight.StartAttack();
+                    //}
+                    //}
+                    
+                }
+                //VERY VERY close
+                //if(Vector3.Distance(this.transform.position, Min.transform.position) < criticalDist / 2.05f){
+                //	Debug.Log(this.gameObject.name + " is moving back", this.gameObject);
+                //	agent.updateRotation=false; 
+                //	body.AddForce((this.transform.position - Min.transform.position));
+                    //agent.SetDestination(-this.transform.forward * 100f);
+                    //agent.Move(-this.transform.forward);
+                    //Back up?
+                // }
+                // else{
+                // 	agent.updateRotation=true; 
+                // }
             }
         }
     }
@@ -663,24 +657,7 @@ public class NPCMove : MonoBehaviour
         
     }
 	void changeDebugText(){
-        if(chaser){
-            if(scary){
-                debugText.text = "Scary Chaser";
-            }
-            else if(chasing){
-                debugText.text = "Chasing Chaser";
-            }
-            else if(brave){
-                debugText.text = "Brave Chaser";
-            }
-            else if(scared){
-                debugText.text = "Scared Chaser";
-            }
-            else{
-                debugText.text = "Chaser";
-            }
-        }
-        else if(runner){
+        if(runner){
             if(scary){
                 debugText.text = "Scary Runner";
             }
